@@ -15,9 +15,9 @@
 //  PID variables
 //-------------------------
 
-/* These need to be tunable from outside the MotorController in the future. */
+//These are adjustable from the ROS interface via the setGains message.
 static float Kp = 0.0f;
-static float Ki = 5.0f;
+static float Ki = 8.0f;
 static float Kd = 0.0f;
 
 void
@@ -42,14 +42,6 @@ MotorController::setup_pins ()
   encoder_.setup_pins();
 }
 
-void 
-MotorController::coast()
-{
-  digitalWrite(motorA_, 0);
-  analogWrite(motorB_, 0);
-  errorSum_ = 0.0f;
-}
-
 Direction 
 MotorController::find_direction(float demand)
 {
@@ -68,42 +60,39 @@ MotorController::find_pwm(float demand, float speed)
   float   error, pwm;
   
   pidInfo[motorNum].direction = (speed==0?0:speed>0?1:-1); //backwards = -1, stationary = 0, forwards = 1.
-  if (speed < 0) speed = -speed;
+  //if (speed < 0) speed = -speed;
 
   //Calculate error and set PWM level:
   error       = demand - speed;
   errorSum_   += error * dT;
-  errorSum_   = constrain(errorSum_, -200, 200);
+  errorSum_   = constrain(errorSum_, -255, 255);
   pwm         = Kp * error + Ki * errorSum_ + Kd * (error - lastError_) / dT;
   lastError_  = error;
+
+  //Implement 'dead zone' to kill decay tail
+  if (pwm > -15 && pwm < 15) pwm = 0;
   
   //Store values in debug struct
   pidInfo[motorNum].error = error;
   pidInfo[motorNum].speed = speed;
   pidInfo[motorNum].pwm = (int16_t)pwm;
 
-  /* XXX This truncates towards zero. Is this the right thing to do? */
   return int(pwm);
 }
 
 void
-MotorController::write_to_pins(Direction demandDir, int pwm)
+MotorController::write_to_pins(int pwm)
 {
-  //Constrain PWM:
-  pwm = constrain(pwm, 0, 255);
-
-  switch (demandDir) {
-  case Forward:
-    digitalWrite(motorA_, 0);
+  if (pwm >= 0) {
+    pwm = constrain(pwm, 0, 255);
+    digitalWrite(motorA_, 0); //direction select pin = 0 => forwards
     analogWrite(motorB_, pwm);
-    break;
-  case Backward:
-    digitalWrite(motorA_, 1);
+  }
+  else {
+    pwm = -pwm;
+    pwm = constrain(pwm, 0, 255);
+    digitalWrite(motorA_, 1); //direction select pin = 1 => backwards
     analogWrite(motorB_, pwm);
-    break;
-  case Stopped:
-    coast();
-    break;
   }
 }
 
@@ -111,7 +100,6 @@ MotorController::write_to_pins(Direction demandDir, int pwm)
 void 
 MotorController::process_pid (const geometry_msgs::Twist &twist)
 {
-  /* We don't want to work in doubles, it's expensive and not worth it. */
   float twX   = float(twist.linear.x);
   float twTh  = float(twist.angular.z);
 
@@ -120,12 +108,8 @@ MotorController::process_pid (const geometry_msgs::Twist &twist)
   //Demanded encoder speed for this motor
   float demandEnc = demandFS * gearboxRatio / (float(PI) * wheelDia); 
   // (Revs per sec for the encoder)
-  float speed     = encoder_.speed(); 
-
-  //Set drive and gnd pins
-  auto demandDir  = find_direction(demandEnc);
-  if (demandEnc < 0) demandEnc = -demandEnc;
+  float speed     = encoder_.speed();
 
   auto pwm  = find_pwm(demandEnc, speed);
-  write_to_pins(demandDir, pwm);
+  write_to_pins(pwm);
 }
