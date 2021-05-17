@@ -24,7 +24,7 @@ Odometer::calculate_moves()
     auto wheelDist = PI * wheelDia * m.revolutions() / gearboxRatio;
     runningTotal += wheelDist;
     //Pos anti-clockwise, so add right, sub left
-    angTotal += (m.RHS ? -1 : 1) * wheelDist;
+    angTotal += (m.RHS ? 1 : -1) * wheelDist; //Angle was the wrong way round! Left turn should be +ve.
   }
   fwdDist = runningTotal / motors.size();
 

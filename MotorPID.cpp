@@ -60,7 +60,6 @@ MotorController::find_pwm(float demand, float speed)
   float   error, pwm;
   
   pidInfo[motorNum].direction = (speed==0?0:speed>0?1:-1); //backwards = -1, stationary = 0, forwards = 1.
-  //if (speed < 0) speed = -speed;
 
   //Calculate error and set PWM level:
   error       = demand - speed;
