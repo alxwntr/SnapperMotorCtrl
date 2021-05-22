@@ -60,8 +60,6 @@ geometry_msgs::TransformStamped t;
 char base_link[] = "/base_link";
 char odom[] = "/odom";
 tf::TransformBroadcaster broadcaster;
-const int tfRateDivisor = 5;
-int loopCount = 0;
 
 //-------------------------
 //  Loop handling variables
@@ -71,6 +69,8 @@ unsigned long mainLoopTime = 0;
 unsigned long PIDLoopTime = 0;
 unsigned long timeTemp = 0;
 unsigned long wait = 0;
+const int tfRateDivisor = 5;
+int loopCount = 0;
 
 //-------------------------
 //  Functions
@@ -88,6 +88,8 @@ void setup()
   nh.subscribe(s2);
   nh.subscribe(s3);
   broadcaster.init(nh);
+
+  void setupJS();
 }
 
 void publish_tf()
@@ -107,11 +109,8 @@ void publish_tf()
 
 void publish_joint_states(const sensor_msgs::JointState& rotations)
 {
-//  rotations.header.frame_id = '';
-
-//  rotations.name.push_back("left_wheel_joint");
-
-//  rotations.header.stamp = nh.now();
+  ros::Time t = nh.now();
+  rotations.header.stamp = t;
 
   p3.publish(&rotations);
 }
