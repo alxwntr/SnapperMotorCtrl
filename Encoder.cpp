@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "Encoder.h"
+#include "Chassis.h"
 
 void
 Encoder::setup_pins()
@@ -81,5 +82,5 @@ Encoder::revolutions()
     tick_count      = 0;
     interrupts();
 
-    return float(ticks) / edgesPerRev;
+    return float(ticks) / (edgesPerRev*gearboxRatio);
 }

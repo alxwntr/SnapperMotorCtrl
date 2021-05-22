@@ -5,10 +5,14 @@
 #include <snapper_msgs/pidInfo.h>
 #include <snapper_msgs/ctrlDebug.h>
 #include <snapper_msgs/setGains.h>
+#include <snapper_msgs/setCarDimensions.h>
+#include <sensor_msgs/JointState.h>
 
 #include "DeadReckoning.h"
 #include "MotorArray.h"
+#include "MotorPID.h"
 #include "Debug.h"
+#include "Chassis.h"
 
 //To start communication, use:
 //rosrun rosserial_python serial_node.py /dev/ttyACM0 _baud:=1000000 (remember #define USE_USBCON 1)
@@ -28,6 +32,7 @@ const int angDmdMax = 6;
 //Publishers and subscriber:
 ros::Publisher p1("demand_confirm", &confirm);
 ros::Publisher p2("debug", &debugInfo);
+ros::Publisher p3("joint_states", &rotations);
 
 void confirmCallback(const geometry_msgs::Twist& msg)
 {
@@ -41,8 +46,14 @@ void gainSetCallback(const snapper_msgs::setGains& gainMsg)
   set_gains (gainMsg);
 }
 
-ros::Subscriber<geometry_msgs::Twist> s1("demand_out", &confirmCallback);
+void gainCarDimsCallback(const snapper_msgs::setCarDimensions& dimsMsg)
+{
+  set_dims (dimsMsg);
+}
+
+ros::Subscriber<geometry_msgs::Twist> s1("cmd_vel", &confirmCallback);
 ros::Subscriber<snapper_msgs::setGains> s2("set_gain", &gainSetCallback);
+ros::Subscriber<snapper_msgs::setCarDimensions> s3("set_dims", &gainCarDimsCallback);
 
 //  tf variables:
 geometry_msgs::TransformStamped t;
@@ -75,6 +86,7 @@ void setup()
   nh.advertise(p2);
   nh.subscribe(s1);
   nh.subscribe(s2);
+  nh.subscribe(s3);
   broadcaster.init(nh);
 }
 
@@ -92,6 +104,21 @@ void publish_tf()
 
   broadcaster.sendTransform(t);
 }
+
+void publish_joint_states(const sensor_msgs::JointState& rotations)
+{
+//  rotations.header.frame_id = '';
+
+//  rotations.name.push_back("left_wheel_joint");
+
+//  rotations.header.stamp = nh.now();
+
+  p3.publish(&rotations);
+}
+
+//-------------------------
+//  Main loop
+//-------------------------
 
 void loop()
 {
