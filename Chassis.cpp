@@ -21,7 +21,7 @@ void
 setupJS()
 {
   rotations.name_length = 2;
-  char* id = "base_link";
+  char *id = "base_link";
   char *a[] = {"left_wheel_joint", "right_wheel_joint"};
   rotations.header.frame_id = id;
   rotations.name = a;

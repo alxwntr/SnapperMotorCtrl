@@ -84,6 +84,7 @@ void setup()
   nh.initNode();
   nh.advertise(p1);
   nh.advertise(p2);
+  nh.advertise(p3);
   nh.subscribe(s1);
   nh.subscribe(s2);
   nh.subscribe(s3);
@@ -107,10 +108,9 @@ void publish_tf()
   broadcaster.sendTransform(t);
 }
 
-void publish_joint_states(const sensor_msgs::JointState& rotations)
+void publish_joint_states()
 {
-  ros::Time t = nh.now();
-  rotations.header.stamp = t;
+  rotations.header.stamp = nh.now();
 
   p3.publish(&rotations);
 }
@@ -131,6 +131,7 @@ void loop()
   if (loopCount == tfRateDivisor)
   {
     odometer.calculate_moves();
+    publish_joint_states();
     
     loopCount = 0;
     publish_tf();
