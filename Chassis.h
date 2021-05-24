@@ -11,10 +11,8 @@ extern float gearboxRatio;
 
 extern sensor_msgs::JointState rotations;
 
-void setupJS();
-
 void set_dims (const snapper_msgs::setCarDimensions &dims);
 
-void store_rotations (float rots[2]);
+void store_rotations (float rots[2], int wheels);
 
 #endif

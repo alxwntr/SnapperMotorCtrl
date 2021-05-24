@@ -59,6 +59,10 @@ ros::Subscriber<snapper_msgs::setCarDimensions> s3("set_dims", &gainCarDimsCallb
 geometry_msgs::TransformStamped t;
 char base_link[] = "/base_link";
 char odom[] = "/odom";
+//JS variabes:
+sensor_msgs::JointState rotations;
+static char *names[] = {"left_wheel_joint", "right_wheel_joint"};
+static float rots[2] = {0, 0};
 tf::TransformBroadcaster broadcaster;
 
 //-------------------------
@@ -90,7 +94,17 @@ void setup()
   nh.subscribe(s3);
   broadcaster.init(nh);
 
-  void setupJS();
+  setupJS();
+}
+
+void
+setupJS()
+{
+  rotations.header.frame_id = base_link;
+  rotations.name_length = 2;
+  rotations.name = names;
+  rotations.position_length = 2;
+  rotations.position = rots;
 }
 
 void publish_tf()
@@ -110,6 +124,7 @@ void publish_tf()
 
 void publish_joint_states()
 {
+  
   rotations.header.stamp = nh.now();
 
   p3.publish(&rotations);
@@ -131,11 +146,11 @@ void loop()
   if (loopCount == tfRateDivisor)
   {
     odometer.calculate_moves();
-    publish_joint_states();
     
     loopCount = 0;
+    
     publish_tf();
-
+    publish_joint_states();
     publish_debug( p2 );
   }
 

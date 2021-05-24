@@ -30,13 +30,13 @@ Odometer::calculate_moves()
     runningTotal += wheelDist;
     //Pos anti-clockwise, so add right, sub left
     angTotal += (m.RHS ? 1 : -1) * wheelDist; //Angle was the wrong way round! Left turn should be +ve.
-    int idx =m.RHS;
+    int idx = m.RHS;
     rots[idx] = rev; //Becomes [left, right]
   }
   fwdDist = runningTotal / motors.size();
 
-  //Send wheel rotations to joint state store
-  store_rotations(rots);
+  //Send wheel rotations to joint state store (TWO WHEELS)
+  store_rotations(rots, 2);
 
   dTheta = angTotal / wheelbase;
   x += fwdDist * cos(theta + dTheta / 2);
