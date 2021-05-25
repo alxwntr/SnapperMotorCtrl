@@ -69,18 +69,18 @@ Encoder::speed ()
         return 0.0;
 
     float   edgesPerUs   = count / float(interval);
-    float   revsPerSec   = (edgesPerUs * 1000000) / edgesPerRev;
+    float   radiansPerSec   = (edgesPerUs * 1000000) / edgesPerRad;
 
-    return (dir == Forward) ? revsPerSec : -revsPerSec;
+    return (dir == Forward) ? radiansPerSec : -radiansPerSec;
 }
 
 float
-Encoder::revolutions()
+Encoder::angle()
 {
     noInterrupts();
     int32_t ticks   = tick_count;
     tick_count      = 0;
     interrupts();
 
-    return float(ticks) / (edgesPerRev*gearboxRatio);
+    return float(ticks) / (edgesPerRad*gearboxRatio);
 }

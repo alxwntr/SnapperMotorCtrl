@@ -20,7 +20,7 @@ class Encoder {
          /* Encoder signal pins. Pin A has an interrupt; pin B is used
           * only for quadrature. */
         pinA(pinA), pinB(pinB),
-        edgesPerRev(32.0f), /* number of edges in one encoder revolution. Currently 32 per channel. */
+        edgesPerRad(32.0f/(2*PI)), /* number of edges in one encoder radian. Currently 32 per channel per rev. */
         spdTimeout(50000ul) /* spdTimeout allows spd to reach zero after a set period */
         { }
 
@@ -28,8 +28,8 @@ class Encoder {
     void    handle_irq  (InterruptPin pin);
 
     float   speed       ();
-    // This returns the number of revolutions since last time it was called
-    float   revolutions    ();
+    // This returns the angle in radians since last time it was called
+    float   angle    ();
 
 #ifndef _Encoder_TESTING
     private:
@@ -39,7 +39,7 @@ class Encoder {
     const int               pinA;
     const int               pinB;
 
-    const float             edgesPerRev;
+    const float             edgesPerRad;
     const time              spdTimeout;
 
     ring_buffer<time, 5>    tick_times;

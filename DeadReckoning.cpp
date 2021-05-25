@@ -8,7 +8,7 @@
 Odometer odometer;
 
 //Array to carry joint rotations
-float rots[2];
+float angleIncrement[2];
 
 //-------------------------
 //  Movement functions
@@ -25,18 +25,18 @@ Odometer::calculate_moves()
 
   for (auto &m : motors)
   {
-    float rev = m.revolutions();
-    auto wheelDist = PI * wheelDia * rev;
+    float rads = m.angle();
+    auto wheelDist = (wheelDia/2) * rads;
     runningTotal += wheelDist;
     //Pos anti-clockwise, so add right, sub left
     angTotal += (m.RHS ? 1 : -1) * wheelDist; //Angle was the wrong way round! Left turn should be +ve.
     int idx = m.RHS;
-    rots[idx] = rev; //Becomes [left, right]
+    angleIncrement[idx] = rads; //Becomes [left, right]
   }
   fwdDist = runningTotal / motors.size();
 
   //Send wheel rotations to joint state store (TWO WHEELS)
-  store_rotations(rots, 2);
+  store_rotations(angleIncrement, 2);
 
   dTheta = angTotal / wheelbase;
   x += fwdDist * cos(theta + dTheta / 2);

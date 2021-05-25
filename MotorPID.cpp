@@ -17,7 +17,7 @@
 
 //These are adjustable from the ROS interface via the setGains message.
 static float Kp = 0.0f;
-static float Ki = 8.0f;
+static float Ki = 1.0f;
 static float Kd = 0.0f;
 
 void
@@ -105,8 +105,8 @@ MotorController::process_pid (const geometry_msgs::Twist &twist)
   //Demanded floor speed for this motor
   float demandFS  = twX + (RHS ? -1 : 1) * twTh * wheelbase / 2;
   //Demanded encoder speed for this motor
-  float demandEnc = demandFS * gearboxRatio / (float(PI) * wheelDia); 
-  // (Revs per sec for the encoder)
+  float demandEnc = demandFS * gearboxRatio / (wheelDia/2); 
+  // (Radians per sec for the encoder)
   float speed     = encoder_.speed();
 
   auto pwm  = find_pwm(demandEnc, speed);

@@ -16,11 +16,11 @@ set_dims(const snapper_msgs::setCarDimensions &dims)
 }
 
 void
-store_rotations(float rots[2], int wheels)
+store_rotations(float angleIncrement[2], int wheels)
 {
   for (int i=0; i<wheels; i++)
   {
-    float rot_tot = rotations.position[i] + rots[i];
+    float rot_tot = rotations.position[i] + angleIncrement[i];
     if (rot_tot > PI)
     {
       rotations.position[i] = -2*PI + rot_tot; 

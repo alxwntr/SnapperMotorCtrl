@@ -30,8 +30,8 @@ class MotorController {
     void process_pid (const geometry_msgs::Twist &twist);
 
     // XXX These should not forward through the MotorController
-    float revolutions() {
-        return encoder_.revolutions();
+    float angle() {
+        return encoder_.angle();
     }
 
   private:

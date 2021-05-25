@@ -62,7 +62,7 @@ char odom[] = "/odom";
 //JS variabes:
 sensor_msgs::JointState rotations;
 static char *names[] = {"left_wheel_joint", "right_wheel_joint"};
-static float rots[2] = {0, 0};
+static float wheelAngles[2] = {0, 0};
 tf::TransformBroadcaster broadcaster;
 
 //-------------------------
@@ -104,7 +104,7 @@ setupJS()
   rotations.name_length = 2;
   rotations.name = names;
   rotations.position_length = 2;
-  rotations.position = rots;
+  rotations.position = wheelAngles;
 }
 
 void publish_tf()

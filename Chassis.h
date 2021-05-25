@@ -13,6 +13,6 @@ extern sensor_msgs::JointState rotations;
 
 void set_dims (const snapper_msgs::setCarDimensions &dims);
 
-void store_rotations (float rots[2], int wheels);
+void store_rotations (float angleIncrement[2], int wheels);
 
 #endif
