@@ -15,7 +15,7 @@
 #include "Chassis.h"
 
 //To start communication, use:
-//rosrun rosserial_python serial_node.py /dev/ttyACM0 _baud:=1000000 (remember #define USE_USBCON 1)
+//rosrun rosserial_python serial_node.py /dev/ttyACM0 _baud:=1000000 (on USB port, remember #define USE_USBCON 1)
 //rosrun rosserial_python serial_node.py /dev/ttyAMA0  _baud:=1000000 (on pi3 serial pins)
 
 //-------------------------
@@ -32,7 +32,7 @@ const int angDmdMax = 6;
 //Publishers and subscriber:
 ros::Publisher p1("demand_confirm", &confirm);
 ros::Publisher p2("debug", &debugInfo);
-ros::Publisher p3("joint_states", &rotations);
+ros::Publisher p3("joint_states", &wheelStates);
 
 void confirmCallback(const geometry_msgs::Twist& msg)
 {
@@ -60,7 +60,7 @@ geometry_msgs::TransformStamped t;
 char base_link[] = "/base_link";
 char odom[] = "/odom";
 //JS variabes:
-sensor_msgs::JointState rotations;
+sensor_msgs::JointState wheelStates;
 static char *names[] = {"left_wheel_joint", "right_wheel_joint"};
 static float wheelAngles[2] = {0, 0};
 tf::TransformBroadcaster broadcaster;
@@ -100,11 +100,11 @@ void setup()
 void
 setupJS()
 {
-  rotations.header.frame_id = base_link;
-  rotations.name_length = 2;
-  rotations.name = names;
-  rotations.position_length = 2;
-  rotations.position = wheelAngles;
+  wheelStates.header.frame_id = base_link;
+  wheelStates.name_length = 2;
+  wheelStates.name = names;
+  wheelStates.position_length = 2;
+  wheelStates.position = wheelAngles;
 }
 
 void publish_tf()
@@ -125,9 +125,9 @@ void publish_tf()
 void publish_joint_states()
 {
   
-  rotations.header.stamp = nh.now();
+  wheelStates.header.stamp = nh.now();
 
-  p3.publish(&rotations);
+  p3.publish(&wheelStates);
 }
 
 //-------------------------

@@ -36,7 +36,7 @@ Odometer::calculate_moves()
   fwdDist = runningTotal / motors.size();
 
   //Send wheel rotations to joint state store (TWO WHEELS)
-  store_rotations(angleIncrement, 2);
+  store_wheel_states(angleIncrement, 2);
 
   dTheta = angTotal / wheelbase;
   x += fwdDist * cos(theta + dTheta / 2);
