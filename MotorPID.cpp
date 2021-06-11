@@ -21,11 +21,11 @@ static float Ki = 1.0f;
 static float Kd = 0.0f;
 
 void
-set_gains(const snapper_msgs::setGains &gains)
+set_gains(float propG, float intG, float diffG)
 {
-  Kp = gains.Kp;
-  Ki = gains.Ki;
-  Kd = gains.Kd;
+  Kp = propG;
+  Ki = intG;
+  Kd = diffG;
 }
 
 //-------------------

@@ -11,7 +11,7 @@ extern float gearboxRatio;
 
 extern sensor_msgs::JointState wheelStates;
 
-void set_dims (const snapper_msgs::setCarDimensions &dims);
+void set_dims (float WB, float WD, float GB);
 
 void store_wheel_states (float angleIncrement[2], int wheels);
 

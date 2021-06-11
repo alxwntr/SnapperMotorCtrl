@@ -9,7 +9,7 @@
 
 const float dT = 0.02; //50Hz - can't go too high because of lack of encoder pulses
 
-void set_gains (const snapper_msgs::setGains &gains);
+void set_gains (float propG, float intG, float diffG);
 
 //-------------------
 // MotorController Class

@@ -4,9 +4,10 @@
 #include <geometry_msgs/Twist.h>
 #include <snapper_msgs/pidInfo.h>
 #include <snapper_msgs/ctrlDebug.h>
-#include <snapper_msgs/setGains.h>
-#include <snapper_msgs/setCarDimensions.h>
+#include <snapper_msgs/SetGains.h>
+#include <snapper_msgs/SetCarDimensions.h>
 #include <sensor_msgs/JointState.h>
+#include <rosserial_arduino/Test.h>
 
 #include "DeadReckoning.h"
 #include "MotorArray.h"
@@ -30,30 +31,32 @@ const int linDmdMax = 2;
 const int angDmdMax = 6;
 
 //Publishers and subscriber:
-ros::Publisher p1("demand_confirm", &confirm);
-ros::Publisher p2("debug", &debugInfo);
-ros::Publisher p3("joint_states", &wheelStates);
+ros::Publisher debug_pub("debug", &debugInfo);
+ros::Publisher JS_pub("joint_states", &wheelStates);
 
-void confirmCallback(const geometry_msgs::Twist& msg)
+void demandCallback(const geometry_msgs::Twist& msg)
 {
   confirm.linear.x = constrain (msg.linear.x, -linDmdMax, linDmdMax);
   confirm.angular.z = constrain (msg.angular.z, -angDmdMax, angDmdMax);
-  p1.publish( &confirm );
 }
 
-void gainSetCallback(const snapper_msgs::setGains& gainMsg)
+using snapper_msgs::SetGains;
+void callback(const SetGains::Request & req, SetGains::Response & res)
 {
-  set_gains (gainMsg);
+  set_gains (req.Kp, req.Ki, req.Kd);
+  res.confirmation = "Gains set as requested. Be wary of instabilities.";
 }
 
-void gainCarDimsCallback(const snapper_msgs::setCarDimensions& dimsMsg)
+using snapper_msgs::SetCarDimensions;
+void callback(const SetCarDimensions::Request & req, SetCarDimensions::Response & res)
 {
-  set_dims (dimsMsg);
+  set_dims (req.wheelBase, req.wheelDia, req.gearboxRatio);
+  res.confirmation = "Car dimensions set as requested";
 }
 
-ros::Subscriber<geometry_msgs::Twist> s1("cmd_vel", &confirmCallback);
-ros::Subscriber<snapper_msgs::setGains> s2("set_gain", &gainSetCallback);
-ros::Subscriber<snapper_msgs::setCarDimensions> s3("set_dims", &gainCarDimsCallback);
+ros::Subscriber<geometry_msgs::Twist> cmd_sub("cmd_vel", &demandCallback);
+ros::ServiceServer<SetGains::Request, SetGains::Response> gains_server("set_gains_srv",&callback);
+ros::ServiceServer<SetCarDimensions::Request, SetCarDimensions::Response> dims_server("set_dims_srv",&callback);
 
 //  tf variables:
 geometry_msgs::TransformStamped t;
@@ -86,12 +89,11 @@ void setup()
 
   nh.getHardware()->setBaud(1000000);
   nh.initNode();
-  nh.advertise(p1);
-  nh.advertise(p2);
-  nh.advertise(p3);
-  nh.subscribe(s1);
-  nh.subscribe(s2);
-  nh.subscribe(s3);
+  nh.advertise(debug_pub);
+  nh.advertise(JS_pub);
+  nh.subscribe(cmd_sub);
+  nh.advertiseService(gains_server);
+  nh.advertiseService(dims_server);
   broadcaster.init(nh);
 
   setupJS();
@@ -127,7 +129,7 @@ void publish_joint_states()
   
   wheelStates.header.stamp = nh.now();
 
-  p3.publish(&wheelStates);
+  JS_pub.publish(&wheelStates);
 }
 
 //-------------------------
@@ -151,7 +153,7 @@ void loop()
     
     publish_tf();
     publish_joint_states();
-    publish_debug( p2 );
+    publish_debug( debug_pub );
   }
 
   nh.spinOnce();

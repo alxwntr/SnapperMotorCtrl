@@ -4,15 +4,15 @@
 #include "MotorArray.h"
 
 float wheelbase = 0.230;
-float wheelDia=0.084;
-float gearboxRatio=89.94;
+float wheelDia = 0.084;
+float gearboxRatio = 89.94;
 
 void
-set_dims(const snapper_msgs::setCarDimensions &dims)
+set_dims(float WB, float WD, float GB)
 {
-  wheelbase = dims.wheelBase;
-  wheelDia = dims.wheelDia;
-  gearboxRatio = dims.gearboxRatio;
+  wheelbase = WB;
+  wheelDia = WD;
+  gearboxRatio = GB;
 }
 
 void
